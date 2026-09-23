@@ -1,12 +1,34 @@
 import 'package:flutter/material.dart';
 
 import '../models/vehiculo.dart';
+import 'agregar_vehiculo_screen.dart';
 import 'vehiculo_detalle_screen.dart';
 
-class VehiculosScreen extends StatelessWidget {
+class VehiculosScreen extends StatefulWidget {
   const VehiculosScreen({super.key, required this.vehiculos});
 
   final List<Vehiculo> vehiculos;
+
+  @override
+  State<VehiculosScreen> createState() => _VehiculosScreenState();
+}
+
+class _VehiculosScreenState extends State<VehiculosScreen> {
+  late final List<Vehiculo> _vehiculos = List.of(widget.vehiculos);
+
+  Future<void> _agregarVehiculo() async {
+    final vehiculo = await Navigator.of(context).push<Vehiculo>(
+      MaterialPageRoute<Vehiculo>(
+        builder: (context) => AgregarVehiculoScreen(
+          placasRegistradas: _vehiculos
+              .map((vehiculo) => vehiculo.placa)
+              .toSet(),
+        ),
+      ),
+    );
+    if (!mounted || vehiculo == null) return;
+    setState(() => _vehiculos.add(vehiculo));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +45,13 @@ class VehiculosScreen extends StatelessWidget {
             const SizedBox(height: 8),
             const Text('Selecciona un vehículo para consultar sus llantas.'),
             const SizedBox(height: 16),
-            for (final vehiculo in vehiculos)
+            FilledButton.icon(
+              onPressed: _agregarVehiculo,
+              icon: const Icon(Icons.add),
+              label: const Text('Agregar vehículo'),
+            ),
+            const SizedBox(height: 16),
+            for (final vehiculo in _vehiculos)
               Card(
                 child: ListTile(
                   leading: const Icon(Icons.directions_car_outlined),

@@ -1,17 +1,46 @@
-# bitacora_llantas
+# Bitácora de llantas
 
-A new Flutter project.
+Aplicación Flutter para llevar el seguimiento de las llantas de cada vehículo.
 
-## Getting Started
+## Implementado
 
-This project is a starting point for a Flutter application.
+- Dos vehículos de ejemplo con alias, placa y kilometraje.
+- Alta de vehículos y actualización inmediata de la lista.
+- Alias y placa obligatorios; espacios exteriores eliminados y placas en mayúsculas.
+- Placas únicas (sin distinguir mayúsculas) y kilometraje entero no negativo.
+- Detalle de cada vehículo con cuatro posiciones sin llanta asignada.
+- Datos únicamente en memoria: al reiniciar la app se restablecen los ejemplos.
 
-A few resources to get you started if this is your first Flutter project:
+## Planeado, en este orden
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+1. Asignar una llanta a una posición.
+2. Actualizar kilometraje y mostrar distancia recorrida.
+3. Guardar datos entre sesiones.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Ejecutar y verificar
+
+Con Flutter instalado y un dispositivo disponible:
+
+```sh
+flutter pub get
+flutter run
+flutter analyze
+flutter test
+```
+
+## Flujo de trabajo
+
+- `main`: versión funcional con análisis y pruebas aprobados.
+- Una rama por tarea: `feat/alta-vehiculos`, `fix/descripcion` o `docs/descripcion`.
+- Commits pequeños con prefijos `feat:`, `fix:`, `docs:` o `test:`.
+- Subir la rama y abrir un pull request hacia `main`, explicando cambios y pruebas.
+- Revisar el diff y comprobar la función antes de unir el pull request.
+- Antes de la siguiente rama, actualizar `main` con `git pull --ff-only origin main`.
+
+## Estructura y navegación
+
+`Vehiculo` es un modelo inmutable. La lista mantiene una copia mutable de los
+vehículos en su `State`. El formulario usa `Form` y `TextFormField` para validar
+los datos; al guardar devuelve un `Vehiculo` con `Navigator.pop`. La lista espera
+el resultado, agrega el vehículo con `setState` y pasa ese mismo objeto al detalle
+por su constructor. Cancelar el formulario no modifica la lista.
