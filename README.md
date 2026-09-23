@@ -8,14 +8,15 @@ Aplicación Flutter para llevar el seguimiento de las llantas de cada vehículo.
 - Alta de vehículos y actualización inmediata de la lista.
 - Alias y placa obligatorios; espacios exteriores eliminados y placas en mayúsculas.
 - Placas únicas (sin distinguir mayúsculas) y kilometraje entero no negativo.
-- Detalle de cada vehículo con cuatro posiciones sin llanta asignada.
+- Detalle con cuatro posiciones: toca una vacía para asignar una llanta.
+- Marca, modelo y medida obligatorios; kilometraje de instalación tomado del vehículo.
+- Las asignaciones se conservan al navegar; las posiciones ocupadas muestran sus datos.
 - Datos únicamente en memoria: al reiniciar la app se restablecen los ejemplos.
 
 ## Planeado, en este orden
 
-1. Asignar una llanta a una posición.
-2. Actualizar kilometraje y mostrar distancia recorrida.
-3. Guardar datos entre sesiones.
+1. Actualizar kilometraje y mostrar distancia recorrida.
+2. Guardar datos entre sesiones.
 
 ## Ejecutar y verificar
 
@@ -44,3 +45,8 @@ vehículos en su `State`. El formulario usa `Form` y `TextFormField` para valida
 los datos; al guardar devuelve un `Vehiculo` con `Navigator.pop`. La lista espera
 el resultado, agrega el vehículo con `setState` y pasa ese mismo objeto al detalle
 por su constructor. Cancelar el formulario no modifica la lista.
+
+El formulario de llantas devuelve una Llanta al detalle. El detalle genera un
+Vehiculo actualizado y notifica a la lista mediante un callback, por lo que la
+asignación se conserva al reabrirlo. No se permite reemplazar una posición ocupada
+en este incremento. La medida es texto obligatorio, sin validación de formato.
