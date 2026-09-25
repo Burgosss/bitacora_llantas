@@ -64,8 +64,17 @@ class _VehiculosScreenState extends State<VehiculosScreen> {
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute<void>(
-                        builder: (context) =>
-                            VehiculoDetalleScreen(vehiculo: vehiculo),
+                        builder: (context) => VehiculoDetalleScreen(
+                          vehiculo: vehiculo,
+                          onVehiculoActualizado: (actualizado) {
+                            setState(() {
+                              final indice = _vehiculos.indexWhere(
+                                (item) => item.placa == actualizado.placa,
+                              );
+                              _vehiculos[indice] = actualizado;
+                            });
+                          },
+                        ),
                       ),
                     );
                   },
