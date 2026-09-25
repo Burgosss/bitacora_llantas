@@ -23,11 +23,55 @@ void main() {
     expect(find.text('Mi auto'), findsOneWidget);
     expect(find.text('Placa: NUEVA-123\n0 km'), findsOneWidget);
     expect(find.text('Auto familiar'), findsOneWidget);
+    expect(find.text('Camioneta de trabajo'), findsOneWidget);
+    expect(find.byType(ListTile), findsNWidgets(3));
     await tester.tap(find.text('Mi auto'));
     await tester.pumpAndSettle();
     expect(find.text('Placa: NUEVA-123'), findsOneWidget);
     expect(find.text('Kilometraje: 0 km'), findsOneWidget);
     expect(find.text('Sin llanta asignada'), findsNWidgets(4));
+  });
+
+  testWidgets('Rechaza kilometraje inválido con alias y placa válidos', (
+    tester,
+  ) async {
+    await abrirAlta(tester);
+    final campos = find.byType(TextFormField);
+    await tester.enterText(campos.at(0), 'Auto nuevo');
+    await tester.enterText(campos.at(1), 'NUE-456');
+    for (final invalido in ['-1', '1.5', 'abc']) {
+      await tester.enterText(campos.at(2), invalido);
+      await tester.tap(find.text('Guardar vehículo'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Ingresa un kilometraje entero no negativo.'),
+        findsOneWidget,
+      );
+      expect(find.byType(TextFormField), findsNWidgets(3));
+      expect(find.text('Mis vehículos'), findsNothing);
+    }
+    // Corregir únicamente el kilometraje permite completar el alta.
+    await tester.enterText(campos.at(2), '12345');
+    await tester.tap(find.text('Guardar vehículo'));
+    await tester.pumpAndSettle();
+    expect(find.text('Placa: NUE-456\n12345 km'), findsOneWidget);
+    expect(find.byType(ListTile), findsNWidgets(3));
+  });
+
+  testWidgets('Cancelar un formulario válido no agrega un vehículo', (
+    tester,
+  ) async {
+    await abrirAlta(tester);
+    final campos = find.byType(TextFormField);
+    await tester.enterText(campos.at(0), 'Auto cancelado');
+    await tester.enterText(campos.at(1), 'CAN-123');
+    await tester.enterText(campos.at(2), '100');
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.text('Auto cancelado'), findsNothing);
+    expect(find.text('Auto familiar'), findsOneWidget);
+    expect(find.text('Camioneta de trabajo'), findsOneWidget);
+    expect(find.byType(ListTile), findsNWidgets(2));
   });
 
   testWidgets('Valida campos vacíos, placas repetidas y kilometraje inválido', (
