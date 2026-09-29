@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/vehiculo.dart';
 import '../models/llanta.dart';
 import 'asignar_llanta_screen.dart';
+import 'actualizar_kilometraje_screen.dart';
 
 class VehiculoDetalleScreen extends StatefulWidget {
   const VehiculoDetalleScreen({
@@ -20,6 +21,19 @@ class VehiculoDetalleScreen extends StatefulWidget {
 
 class _VehiculoDetalleScreenState extends State<VehiculoDetalleScreen> {
   late Vehiculo vehiculo = widget.vehiculo;
+
+  Future<void> _actualizarKilometraje() async {
+    final nuevo = await Navigator.of(context).push<int>(
+      MaterialPageRoute<int>(
+        builder: (context) => ActualizarKilometrajeScreen(
+          kilometrajeActual: vehiculo.kilometraje,
+        ),
+      ),
+    );
+    if (!mounted || nuevo == null) return;
+    setState(() => vehiculo = vehiculo.actualizarKilometraje(nuevo));
+    widget.onVehiculoActualizado(vehiculo);
+  }
 
   Future<void> _asignar(PosicionLlanta posicion) async {
     final llanta = await Navigator.of(context).push<Llanta>(
@@ -49,6 +63,11 @@ class _VehiculoDetalleScreenState extends State<VehiculoDetalleScreen> {
             ),
             const SizedBox(height: 8),
             Text('Kilometraje: ${vehiculo.kilometraje} km'),
+            TextButton.icon(
+              onPressed: _actualizarKilometraje,
+              icon: const Icon(Icons.speed),
+              label: const Text('Actualizar kilometraje'),
+            ),
             const SizedBox(height: 24),
             Text(
               'Posiciones de llantas',
@@ -69,9 +88,17 @@ class _VehiculoDetalleScreenState extends State<VehiculoDetalleScreen> {
                   ),
                   title: Text(posicion.etiqueta),
                   subtitle: vehiculo.llantas.containsKey(posicion)
-                      ? Text(
-                          '${vehiculo.llantas[posicion]!.marca} · ${vehiculo.llantas[posicion]!.modelo}\n'
-                          'Instalada a los ${vehiculo.llantas[posicion]!.kilometrajeInstalacion} km',
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${vehiculo.llantas[posicion]!.marca} · ${vehiculo.llantas[posicion]!.modelo}\n'
+                              'Instalada a los ${vehiculo.llantas[posicion]!.kilometrajeInstalacion} km',
+                            ),
+                            Text(
+                              'Recorridos: ${vehiculo.kilometraje - vehiculo.llantas[posicion]!.kilometrajeInstalacion} km',
+                            ),
+                          ],
                         )
                       : const Text('Sin llanta asignada'),
                   trailing: vehiculo.llantas.containsKey(posicion)
