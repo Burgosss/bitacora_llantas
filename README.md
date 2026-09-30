@@ -44,3 +44,7 @@ vehículos en su `State`. El formulario usa `Form` y `TextFormField` para valida
 los datos; al guardar devuelve un `Vehiculo` con `Navigator.pop`. La lista espera
 el resultado, agrega el vehículo con `setState` y pasa ese mismo objeto al detalle
 por su constructor. Cancelar el formulario no modifica la lista.
+
+## API experimental independiente
+
+La API NestJS con MongoDB y Docker Compose se documenta en [api/README.md](api/README.md). Permite listar y crear vehículos, actualizar kilometraje y asignar llantas, con persistencia en MongoDB. **Flutter aún no consume esta API** y sigue usando datos en memoria; sus limitaciones descritas arriba se mantienen. Consulta el documento de la API para endpoints, arranque y la prueba de reinicio.
