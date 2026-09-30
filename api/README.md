@@ -104,7 +104,7 @@ npm --prefix api run test:local
 
 Esta alternativa compila TypeScript, descarga/inicia un **mongod 8.0.17 real** con WiredTiger en una carpeta temporal e inicia NestJS como proceso separado. Ejecuta las mismas pruebas HTTP, detiene y vuelve a iniciar únicamente NestJS, y compara todos los vehículos, IDs y llantas antes/después. Al terminar cierra ambos procesos y elimina solo la carpeta temporal que creó. No modifica datos de Compose. La primera ejecución necesita acceso a la descarga oficial de MongoDB.
 
-En la verificación de este PR, Docker Desktop falló durante su inicio con un error del socket local `dockerInference`. Se validó `docker compose config --quiet`; la prueba local permite verificar la API y el reinicio real sin simular MongoDB. La ejecución de los contenedores y su volumen queda pendiente en un motor Docker operativo.
+En la verificación de este PR, Docker Desktop falló durante su inicio con un error del socket local `dockerInference`. Se validó `docker compose config --quiet`; la prueba local permite verificar la API y el reinicio real sin simular MongoDB. La ejecución con Docker Compose y la persistencia tras reiniciar solo la API ya se comprobaron en GitHub Actions sobre Linux; consulta VERIFICACION.md. Docker Desktop en Windows sigue sin comprobarse.
 
 ## Archivos
 
@@ -119,3 +119,4 @@ El workflow `API Docker Compose` (`.github/workflows/api-compose.yml`) corre en 
 - `../compose.yaml`: API, MongoDB, salud y volumen persistente.
 
 Referencias: [validación de NestJS](https://docs.nestjs.com/techniques/validation), [orden de arranque de Compose](https://docs.docker.com/compose/how-tos/startup-order/).
+
