@@ -27,4 +27,3 @@ Las cuatro rutas, códigos HTTP, campos JSON y errores coinciden con api/README.
 El escaneo por patrones de claves privadas, tokens, contraseñas y URI con credenciales en todos los commits accesibles no encontró coincidencias. Tampoco hay archivos de claves o .env versionados. Esto no equivale a una garantía absoluta de ausencia de secretos.
 
 Sigue sin probarse Docker Desktop en Windows, la recuperación después de reiniciar MongoDB o recrear contenedores y la integración Flutter/API (fuera del alcance). Flutter no cambió en esta revisión; no se repitieron sus pruebas, cuyos resultados anteriores figuran arriba.
-

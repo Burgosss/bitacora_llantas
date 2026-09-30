@@ -119,4 +119,3 @@ El workflow `API Docker Compose` (`.github/workflows/api-compose.yml`) corre en 
 - `../compose.yaml`: API, MongoDB, salud y volumen persistente.
 
 Referencias: [validación de NestJS](https://docs.nestjs.com/techniques/validation), [orden de arranque de Compose](https://docs.docker.com/compose/how-tos/startup-order/).
-
