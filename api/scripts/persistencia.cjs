@@ -3,8 +3,16 @@ const { randomUUID } = require('node:crypto');
 const { execFileSync } = require('node:child_process');
 const { resolve } = require('node:path');
 const base = process.env.API_URL ?? 'http://127.0.0.1:3000';
+const cwd = resolve(__dirname, '../..');
+function estado(servicio) {
+  const id = execFileSync('docker', ['compose', 'ps', '-q', servicio], { cwd, encoding: 'utf8' }).trim();
+  assert.ok(id, `Falta el contenedor ${servicio}`);
+  return execFileSync('docker', ['inspect', '--format', '{{.Id}} {{.State.StartedAt}}', id], { encoding: 'utf8' }).trim();
+}
 
 async function main() {
+  const mongoAntes = estado('mongo');
+  const apiAntes = estado('api');
   const res = await fetch(base + '/vehiculos', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ alias: 'Prueba persistencia', placa: `PERSIST-${randomUUID()}`, kilometraje: 58000 }),
@@ -12,7 +20,9 @@ async function main() {
   assert.equal(res.status, 201);
   const antes = await res.json();
   console.log('Creado antes del reinicio:', antes.id, antes.placa);
-  execFileSync('docker', ['compose', 'restart', 'api'], { cwd: resolve(__dirname, '../..'), stdio: 'inherit' });
+  execFileSync('docker', ['compose', 'restart', 'api'], { cwd, stdio: 'inherit', timeout: 60000 });
+  assert.equal(estado('mongo'), mongoAntes, 'MongoDB no debe reiniciarse');
+  assert.notEqual(estado('api'), apiAntes, 'La API debe haberse reiniciado');
   const limite = Date.now() + 60000;
   while (Date.now() < limite) {
     try {

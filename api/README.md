@@ -108,6 +108,10 @@ En la verificación de este PR, Docker Desktop falló durante su inicio con un e
 
 ## Archivos
 
+### GitHub Actions
+
+El workflow `API Docker Compose` (`.github/workflows/api-compose.yml`) corre en Ubuntu para cada pull request hacia `main`. Construye y levanta los servicios con Docker Compose, consulta `GET /vehiculos`, ejecuta las pruebas HTTP y crea un vehículo para verificar su persistencia después de reiniciar solo la API. También comprueba que MongoDB no se reinició. Los logs se muestran incluso si falla; al terminar se eliminan únicamente los servicios y el volumen del runner temporal. No requiere secretos ni Docker Desktop en Windows.
+
 - `src/vehiculos.dto.ts`: validación y normalización de entrada.
 - `src/vehiculos.service.ts`: conexión, índice único y operaciones atómicas.
 - `src/app.module.ts`: rutas HTTP y registro de dependencias.

@@ -9,6 +9,23 @@ async function request(method, path, body, status) {
   });
   const data = await res.json();
   assert.equal(res.status, status, JSON.stringify(data));
+  assert.match(res.headers.get('content-type'), /application\/json/);
+  if (status >= 400) {
+    assert.equal(data.statusCode, status);
+    assert.equal(typeof data.error, 'string');
+    assert.ok(typeof data.message === 'string' || Array.isArray(data.message));
+  } else {
+    for (const v of Array.isArray(data) ? data : [data]) {
+      assert.deepEqual(Object.keys(v).sort(), ['alias', 'id', 'kilometraje', 'llantas', 'placa']);
+      assert.match(v.id, /^[a-f0-9]{24}$/);
+      assert.equal(typeof v.alias, 'string');
+      assert.equal(typeof v.placa, 'string');
+      assert.ok(Number.isSafeInteger(v.kilometraje) && v.kilometraje >= 0);
+      for (const llanta of Object.values(v.llantas)) {
+        assert.deepEqual(Object.keys(llanta).sort(), ['kilometrajeInstalacion', 'marca', 'modelo']);
+      }
+    }
+  }
   return data;
 }
 
