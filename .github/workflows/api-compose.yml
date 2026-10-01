@@ -1,0 +1,35 @@
+name: API Docker Compose
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  api-compose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Levantar API y MongoDB
+        run: docker compose up --build -d --wait --wait-timeout 180
+      - name: Consultar API y comprobar contrato y validaciones
+        run: |
+          curl --fail --silent --show-error http://127.0.0.1:3000/vehiculos
+          npm --prefix api test
+      - name: Comprobar persistencia reiniciando solo API
+        run: npm --prefix api run test:persistencia
+      - name: Mostrar estado y logs
+        if: always()
+        run: |
+          docker compose ps -a
+          docker compose logs --no-color
+      - name: Limpiar servicios del runner temporal
+        if: always()
+        run: docker compose down -v
