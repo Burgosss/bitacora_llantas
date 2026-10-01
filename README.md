@@ -4,7 +4,7 @@ Flutter consulta una API NestJS/MongoDB para listar y crear vehículos, asignar 
 
 ## Dependencia del backend
 
-Esta rama se creó desde `main` (`72b992f`). La API está en el [PR #6](https://github.com/Burgosss/bitacora_llantas/pull/6), todavía independiente de esta rama. Este PR debe integrarse después del #6; no incluye ni une sus commits. El contrato revisado está en [api/README.md del PR #6](https://github.com/Burgosss/bitacora_llantas/blob/feat/api-persistencia/api/README.md).
+Esta rama se creó desde `main` (`72b992f`) e incorporó la actualización de documentación `dbb8fb6`. La API está en el [PR #6](https://github.com/Burgosss/bitacora_llantas/pull/6), todavía independiente de esta rama. Este PR debe integrarse después del #6; no incluye ni une sus commits. El contrato revisado está en [api/README.md del PR #6](https://github.com/Burgosss/bitacora_llantas/blob/feat/api-persistencia/api/README.md).
 
 ## Ejecutar en Android sin Docker (PowerShell)
 
@@ -67,3 +67,7 @@ flutter test integration_test/api_flujo_test.dart -d emulator-5554 --dart-define
 ```
 
 Son dos ejecuciones separadas de la app: la primera crea, asigna y actualiza; la segunda solo consulta y comprueba los datos desde una instancia nueva. El vehículo queda en MongoDB para inspección. Las pruebas de widgets usan una API inyectada; los ejemplos existen únicamente en `test/fake_api.dart`.
+
+## Capturas de la versión anterior
+
+Se conservan las [capturas reales de la demo en memoria](docs/capturas/) incorporadas desde main. Son históricas: la versión conectada ya no carga esos dos vehículos de ejemplo.
