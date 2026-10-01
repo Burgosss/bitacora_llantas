@@ -1,3 +1,5 @@
+import 'fake_api.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
@@ -5,7 +7,8 @@ import 'package:bitacora_llantas/main.dart';
 
 void main() {
   Future<void> abrirAlta(WidgetTester tester) async {
-    await tester.pumpWidget(const BitacoraLlantasApp());
+    await tester.pumpWidget(BitacoraLlantasApp(api: FakeApi()));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Agregar vehículo'));
     await tester.pumpAndSettle();
   }
@@ -113,7 +116,8 @@ void main() {
   testWidgets('Lista vehículos y abre el detalle del vehículo seleccionado', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const BitacoraLlantasApp());
+    await tester.pumpWidget(BitacoraLlantasApp(api: FakeApi()));
+    await tester.pumpAndSettle();
 
     expect(find.text('Bitácora de llantas'), findsOneWidget);
     for (final vehiculo in vehiculosDeEjemplo) {

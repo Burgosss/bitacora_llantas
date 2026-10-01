@@ -1,12 +1,17 @@
+import 'guardar_cambios.dart';
+import '../models/vehiculo.dart';
+
 import 'package:flutter/material.dart';
 
 class ActualizarKilometrajeScreen extends StatefulWidget {
   const ActualizarKilometrajeScreen({
     super.key,
     required this.kilometrajeActual,
+    required this.guardar,
   });
 
   final int kilometrajeActual;
+  final Future<Vehiculo> Function(int kilometraje) guardar;
 
   @override
   State<ActualizarKilometrajeScreen> createState() =>
@@ -24,9 +29,9 @@ class _ActualizarKilometrajeScreenState
     super.dispose();
   }
 
-  void _guardar() {
-    if (!_formKey.currentState!.validate()) return;
-    Navigator.of(context).pop(int.parse(_kilometraje.text.trim()));
+  Future<Vehiculo?> _guardar() async {
+    if (!_formKey.currentState!.validate()) return null;
+    return widget.guardar(int.parse(_kilometraje.text.trim()));
   }
 
   @override
@@ -50,7 +55,7 @@ class _ActualizarKilometrajeScreenState
                 ),
                 keyboardType: TextInputType.number,
                 textInputAction: TextInputAction.done,
-                onFieldSubmitted: (_) => _guardar(),
+
                 validator: (value) {
                   final texto = (value ?? '').trim();
                   if (texto.isEmpty) return 'Ingresa el kilometraje.';
@@ -65,10 +70,7 @@ class _ActualizarKilometrajeScreenState
                 },
               ),
               const SizedBox(height: 24),
-              FilledButton(
-                onPressed: _guardar,
-                child: const Text('Guardar kilometraje'),
-              ),
+              GuardarCambios(guardar: _guardar, label: 'Guardar kilometraje'),
             ],
           ),
         ),

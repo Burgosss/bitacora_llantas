@@ -1,6 +1,6 @@
 # API de Bitácora de llantas
 
-API mínima independiente en NestJS 11 y MongoDB. Flutter **todavía no está conectado**: sus datos siguen en memoria. La API empieza sin vehículos de ejemplo y guarda sus propios registros en MongoDB.
+API mínima en NestJS 11 y MongoDB, consumida por Flutter para listar y crear vehículos, actualizar kilometraje y asignar llantas. MongoDB conserva los datos entre sesiones; Flutter mantiene una copia para mostrar y vuelve a consultar al iniciar. La API empieza sin vehículos de ejemplo. Consulta el [README principal](../README.md) para ejecutar Flutter y los servicios sin Docker en Windows.
 
 ## Levantar los servicios
 

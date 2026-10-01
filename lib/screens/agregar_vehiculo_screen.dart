@@ -1,11 +1,18 @@
+import 'guardar_cambios.dart';
+
 import 'package:flutter/material.dart';
 
 import '../models/vehiculo.dart';
 
 class AgregarVehiculoScreen extends StatefulWidget {
-  const AgregarVehiculoScreen({super.key, required this.placasRegistradas});
+  const AgregarVehiculoScreen({
+    super.key,
+    required this.placasRegistradas,
+    required this.guardar,
+  });
 
   final Set<String> placasRegistradas;
+  final Future<Vehiculo> Function(Vehiculo vehiculo) guardar;
 
   @override
   State<AgregarVehiculoScreen> createState() => _AgregarVehiculoScreenState();
@@ -25,9 +32,9 @@ class _AgregarVehiculoScreenState extends State<AgregarVehiculoScreen> {
     super.dispose();
   }
 
-  void _guardar() {
-    if (!_formKey.currentState!.validate()) return;
-    Navigator.of(context).pop(
+  Future<Vehiculo?> _guardar() async {
+    if (!_formKey.currentState!.validate()) return null;
+    return widget.guardar(
       Vehiculo(
         alias: _alias.text.trim(),
         placa: _placa.text.trim().toUpperCase(),
@@ -83,7 +90,7 @@ class _AgregarVehiculoScreenState extends State<AgregarVehiculoScreen> {
                 ),
                 keyboardType: TextInputType.number,
                 textInputAction: TextInputAction.done,
-                onFieldSubmitted: (_) => _guardar(),
+
                 validator: (value) {
                   final texto = (value ?? '').trim();
                   if (texto.isEmpty) return 'Ingresa el kilometraje.';
@@ -95,10 +102,7 @@ class _AgregarVehiculoScreenState extends State<AgregarVehiculoScreen> {
                 },
               ),
               const SizedBox(height: 24),
-              FilledButton(
-                onPressed: _guardar,
-                child: const Text('Guardar vehículo'),
-              ),
+              GuardarCambios(guardar: _guardar, label: 'Guardar vehículo'),
             ],
           ),
         ),

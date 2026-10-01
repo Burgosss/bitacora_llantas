@@ -1,10 +1,13 @@
+import 'fake_api.dart';
+
 import 'package:bitacora_llantas/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Rechaza kilometraje fuera de rango o no entero', (tester) async {
-    await tester.pumpWidget(const BitacoraLlantasApp());
+    await tester.pumpWidget(BitacoraLlantasApp(api: FakeApi()));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Auto familiar'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Delantera derecha'));
@@ -32,7 +35,8 @@ void main() {
   testWidgets(
     'Asigna llantas, conserva posiciones al reabrir y aísla vehículos',
     (tester) async {
-      await tester.pumpWidget(const BitacoraLlantasApp());
+      await tester.pumpWidget(BitacoraLlantasApp(api: FakeApi()));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Auto familiar'));
       await tester.pumpAndSettle();
       final posiciones = [
@@ -81,7 +85,8 @@ void main() {
   testWidgets('Valida datos obligatorios y cancelar deja vacía la posición', (
     tester,
   ) async {
-    await tester.pumpWidget(const BitacoraLlantasApp());
+    await tester.pumpWidget(BitacoraLlantasApp(api: FakeApi()));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Auto familiar'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Delantera izquierda'));

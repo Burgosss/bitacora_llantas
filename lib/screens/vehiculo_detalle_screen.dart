@@ -1,3 +1,5 @@
+import '../data/vehiculos_api.dart';
+
 import 'package:flutter/material.dart';
 
 import '../models/vehiculo.dart';
@@ -9,10 +11,12 @@ class VehiculoDetalleScreen extends StatefulWidget {
   const VehiculoDetalleScreen({
     super.key,
     required this.vehiculo,
+    required this.api,
     required this.onVehiculoActualizado,
   });
 
   final Vehiculo vehiculo;
+  final VehiculosApi api;
   final ValueChanged<Vehiculo> onVehiculoActualizado;
 
   @override
@@ -23,29 +27,32 @@ class _VehiculoDetalleScreenState extends State<VehiculoDetalleScreen> {
   late Vehiculo vehiculo = widget.vehiculo;
 
   Future<void> _actualizarKilometraje() async {
-    final nuevo = await Navigator.of(context).push<int>(
-      MaterialPageRoute<int>(
+    final nuevo = await Navigator.of(context).push<Vehiculo>(
+      MaterialPageRoute<Vehiculo>(
         builder: (context) => ActualizarKilometrajeScreen(
           kilometrajeActual: vehiculo.kilometraje,
+          guardar: (km) => widget.api.actualizarKilometraje(vehiculo.id, km),
         ),
       ),
     );
     if (!mounted || nuevo == null) return;
-    setState(() => vehiculo = vehiculo.actualizarKilometraje(nuevo));
+    setState(() => vehiculo = nuevo);
     widget.onVehiculoActualizado(vehiculo);
   }
 
   Future<void> _asignar(PosicionLlanta posicion) async {
-    final llanta = await Navigator.of(context).push<Llanta>(
-      MaterialPageRoute<Llanta>(
+    final llanta = await Navigator.of(context).push<Vehiculo>(
+      MaterialPageRoute<Vehiculo>(
         builder: (context) => AsignarLlantaScreen(
           posicion: posicion,
+          guardar: (llanta) =>
+              widget.api.asignar(vehiculo.id, posicion, llanta),
           kilometraje: vehiculo.kilometraje,
         ),
       ),
     );
     if (!mounted || llanta == null) return;
-    setState(() => vehiculo = vehiculo.asignarLlanta(posicion, llanta));
+    setState(() => vehiculo = llanta);
     widget.onVehiculoActualizado(vehiculo);
   }
 
