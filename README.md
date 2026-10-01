@@ -1,86 +1,73 @@
 # Bitácora de llantas
 
-Aplicación Flutter para registrar vehículos y consultar el recorrido de sus llantas.
+Flutter consulta una API NestJS/MongoDB para listar y crear vehículos, asignar llantas a cuatro posiciones y actualizar kilometraje. El recorrido es kilometraje actual menos kilometraje de instalación. Se conservan las validaciones. La lista muestra carga, vacío, error y reintento. No hay vehículos de ejemplo ni almacenamiento local de respaldo en la app.
 
-## Funciones actuales
+## Dependencia del backend
 
-- Lista inicial con **Auto familiar** (ABC-123-A, 45200 km) y **Camioneta de trabajo** (XYZ-789-B, 87350 km).
-- **Alta de vehículos:** alias, placa y kilometraje obligatorios. El kilometraje es un entero no negativo. Se eliminan espacios exteriores, la placa se guarda en mayúsculas y no se admiten placas repetidas sin distinguir mayúsculas.
-- **Asignación de llantas:** toca una posición vacía y captura marca, modelo y kilometraje de instalación. Los tres campos son obligatorios; el kilometraje debe ser entero entre 0 y el actual del vehículo, incluidos ambos límites.
-- Cada vehículo tiene cuatro posiciones independientes: delantera izquierda, delantera derecha, trasera izquierda y trasera derecha, vistas desde el asiento del conductor.
-- **Actualización de kilometraje:** desde el detalle, ingresa un entero no negativo igual o mayor al kilometraje actual.
-- **Recorrido por llanta:** se calcula como `kilometraje actual del vehículo - kilometraje de instalación`.
-- Al volver a la lista y reabrir el detalle se conservan los cambios durante la sesión. Volver desde un formulario sin guardar no modifica los datos.
+Esta rama se creó desde `main` (`72b992f`) e incorporó la actualización de documentación `dbb8fb6`. La API está en el [PR #6](https://github.com/Burgosss/bitacora_llantas/pull/6), todavía independiente de esta rama. Este PR debe integrarse después del #6; no incluye ni une sus commits. El contrato revisado está en [api/README.md del PR #6](https://github.com/Burgosss/bitacora_llantas/blob/feat/api-persistencia/api/README.md).
 
-## Datos en memoria y límites
+## Ejecutar en Android sin Docker (PowerShell)
 
-**Los datos todavía no se guardan entre sesiones.** Al reiniciar la aplicación (incluido un hot restart) se pierden los vehículos agregados, las asignaciones y los cambios de kilometraje; vuelven los dos vehículos de ejemplo con posiciones vacías.
-
-No hay base de datos, API ni backend. Las posiciones ocupadas solo muestran información: aún no se pueden editar, retirar ni reemplazar llantas. La persistencia queda pendiente.
-
-## Ejecutar en Android
-
-Necesitas Flutter disponible en el PATH (con Dart compatible con `^3.13.4`, según `pubspec.yaml`), Android SDK y un emulador configurado en Android Studio o un teléfono con depuración USB autorizada.
-
-Desde PowerShell, en la carpeta del proyecto:
+Requisitos: Flutter, Node 22+, SDK Android y emulador iniciado. Desde `C:\Users\burgos\bitacora_llantas`, si la carpeta `api` del PR #6 ya está disponible:
 
 ```powershell
-flutter doctor
+npm --prefix api ci
+npm --prefix api run build
+node tools/dev-api.cjs
+```
+
+El script inicia MongoDB **real 8.0.17** con WiredTiger y NestJS. Usa `.local/mongo` para conservar datos y el puerto local 27018 para MongoDB; no borra esa carpeta al terminar. Necesita descargar el binario oficial de MongoDB la primera vez. Detén los servicios con Ctrl+C. Es solo un servidor de desarrollo, sin autenticación.
+
+Mientras el PR #6 no esté integrado, prepara su API sin cambiar la rama Flutter:
+
+```powershell
+git fetch origin
+New-Item -ItemType Directory -Force .local/backend | Out-Null
+git archive --format=tar --output=.local/api-pr6.tar origin/feat/api-persistencia api
+tar -xf .local/api-pr6.tar -C .local/backend
+npm --prefix .local/backend/api ci
+npm --prefix .local/backend/api run build
+$env:API_DIR = (Resolve-Path .local/backend/api).Path
+node tools/dev-api.cjs
+```
+
+En otra terminal, inicia Flutter con el comando exacto para este emulador:
+
+```powershell
 flutter pub get
-flutter emulators
+flutter run -d emulator-5554 --dart-define=API_URL=http://10.0.2.2:3000
 ```
 
-Inicia un emulador desde Device Manager de Android Studio, o ejecuta lo siguiente sustituyendo `ID_DEL_EMULADOR` por un ID mostrado en el comando anterior:
+`10.0.2.2` accede al host desde el emulador Android. Consulta `http://127.0.0.1:3000/vehiculos` desde Windows. Si funciona Docker, también puedes usar la API con Compose. La URL se configura al compilar, sin credenciales. Sin `API_URL`, la app muestra un error de configuración.
+
+Android declara INTERNET en el manifiesto principal y rechaza HTTP por defecto. Solo `src/debug` permite HTTP a `10.0.2.2`, `127.0.0.1` y `localhost`. El cliente también rechaza HTTP fuera de debug. Release y profile requieren HTTPS; no se desactiva la validación de certificados. Este incremento se prueba en Android; no se habilitó CORS para Flutter web.
+
+## Flujo y fuente de datos
+
+1. Agrega un vehículo con 58000 km.
+2. Asigna una llanta a la delantera izquierda a los 58000 km.
+3. Actualiza a 65000 km: el detalle muestra 7000 km recorridos.
+4. Cierra y abre Flutter: la lista se obtiene nuevamente desde MongoDB a través de la API.
+
+`lib/data/vehiculos_api.dart` concentra las cuatro peticiones HTTP y convierte JSON a `Vehiculo` con ID y llantas. La lista mantiene una copia para mostrar. Los formularios llaman una función asíncrona, esperan confirmación y devuelven el vehículo recibido con `Navigator.pop`. El detalle usa ese resultado, informa a la lista y ambos se redibujan con `setState`. La lista identifica vehículos por ID. `GuardarCambios` impide doble envío y volver atrás durante el guardado, muestra progreso y conserva campos para reintentar. Si una respuesta se pierde después de guardar, vuelve a la lista y usa Actualizar lista para consultar el estado confirmado antes de repetir un alta.
+
+## Verificaciones
 
 ```powershell
-flutter emulators --launch ID_DEL_EMULADOR
-flutter devices
-```
-
-Cuando aparezca como dispositivo Android, sustituye `ID_DEL_DISPOSITIVO` por el ID que devuelve `flutter devices` (por ejemplo, `emulator-5554`):
-
-```powershell
-flutter run -d ID_DEL_DISPOSITIVO
-```
-
-Para un teléfono físico, conéctalo por USB, autoriza la depuración y usa su ID en el mismo comando. Si `flutter doctor` indica licencias Android pendientes, ejecuta `flutter doctor --android-licenses` y revisa los términos. La primera compilación puede descargar dependencias y tardar varios minutos.
-
-## Analizador y pruebas
-
-Desde la raíz del proyecto:
-
-```powershell
+dart format lib test integration_test
 flutter analyze
 flutter test
 ```
 
-Las pruebas de widgets no requieren un emulador. Cubren alta y cancelación, validaciones, asignación independiente por posición y vehículo, conservación al navegar y actualización de kilometraje con recálculo del recorrido.
+Con los servicios activos, ejecuta las dos fases Android con la **misma placa**, nueva para cada ejecución completa:
 
-## Ejemplo de uso
+```powershell
+flutter test integration_test/api_flujo_test.dart -d emulator-5554 --dart-define=API_URL=http://10.0.2.2:3000 --dart-define=DEMO_PLACA=ANDROID-DEMO-UNICA
+flutter test integration_test/api_flujo_test.dart -d emulator-5554 --dart-define=API_URL=http://10.0.2.2:3000 --dart-define=DEMO_PLACA=ANDROID-DEMO-UNICA --dart-define=VERIFICAR_REAPERTURA=true
+```
 
-1. Toca **Agregar vehículo**. Ingresa alias `Auto demo`, placa `DEMO-123` y kilometraje `58000`; pulsa **Guardar vehículo**.
-2. Abre **Auto demo**, toca **Delantera izquierda** y captura marca `Marca demo`, modelo `Modelo A` e instalación `58000`. Pulsa **Guardar llanta**: el recorrido inicial será `0 km`.
-3. Toca **Actualizar kilometraje**, escribe `65000` y pulsa **Guardar kilometraje**. La llanta mostrará `Recorridos: 7000 km`.
-4. Regresa a la lista: el vehículo tendrá `65000 km`. Reabre su detalle para comprobar que conserva la llanta y el recorrido. Las otras tres posiciones siguen vacías.
+Son dos ejecuciones separadas de la app: la primera crea, asigna y actualiza; la segunda solo consulta y comprueba los datos desde una instancia nueva. El vehículo queda en MongoDB para inspección. Las pruebas de widgets usan una API inyectada; los ejemplos existen únicamente en `test/fake_api.dart`.
 
-Escribe los kilometrajes sin separadores de miles (por ejemplo, `65000`).
+## Capturas de la versión anterior
 
-## Estado y navegación
-
-La lista vive en el `State` de `VehiculosScreen`. Los formularios devuelven resultados con `Navigator.pop`: un vehículo, una llanta o un nuevo kilometraje. El detalle crea un vehículo actualizado conservando sus llantas y lo entrega a la lista mediante `onVehiculoActualizado`. `setState` reconstruye la pantalla; el recorrido se calcula al dibujar el detalle y no se guarda como un dato independiente.
-
-## Flujo de Git
-
-- `main`: versión integrada que pasó el análisis y las pruebas.
-- Una rama por tarea: `feat/descripcion`, `fix/descripcion` o `docs/descripcion`.
-- Commits pequeños con prefijos `feat:`, `fix:`, `docs:` o `test:`.
-- Subir la rama y abrir un pull request hacia `main` con cambios y verificaciones; revisar antes de fusionar.
-- Antes de la siguiente rama, actualizar `main` con `git pull --ff-only origin main`.
-
-## Capturas reales
-
-Capturadas en el emulador Pixel 6 con Android 16, ejecutando esta versión. Muestran el estado inicial; el ejemplo anterior explica cómo obtener el recorrido de 7000 km.
-
-| Lista inicial | Alta de vehículo | Detalle y posiciones |
-| --- | --- | --- |
-| ![Lista con los dos vehículos de ejemplo](docs/capturas/01-lista.png) | ![Formulario de alta con alias, placa y kilometraje](docs/capturas/02-alta.png) | ![Detalle con actualización de kilometraje y cuatro posiciones vacías](docs/capturas/03-detalle.png) |
+Se conservan las [capturas reales de la demo en memoria](docs/capturas/) incorporadas desde main. Son históricas: la versión conectada ya no carga esos dos vehículos de ejemplo.

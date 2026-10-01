@@ -1,3 +1,6 @@
+import 'guardar_cambios.dart';
+import '../models/vehiculo.dart';
+
 import 'package:flutter/material.dart';
 
 import '../models/llanta.dart';
@@ -7,10 +10,12 @@ class AsignarLlantaScreen extends StatefulWidget {
     super.key,
     required this.posicion,
     required this.kilometraje,
+    required this.guardar,
   });
 
   final PosicionLlanta posicion;
   final int kilometraje;
+  final Future<Vehiculo> Function(Llanta llanta) guardar;
 
   @override
   State<AsignarLlantaScreen> createState() => _AsignarLlantaScreenState();
@@ -30,9 +35,9 @@ class _AsignarLlantaScreenState extends State<AsignarLlantaScreen> {
     super.dispose();
   }
 
-  void _guardar() {
-    if (!_formKey.currentState!.validate()) return;
-    Navigator.of(context).pop(
+  Future<Vehiculo?> _guardar() async {
+    if (!_formKey.currentState!.validate()) return null;
+    return widget.guardar(
       Llanta(
         marca: _marca.text.trim(),
         modelo: _modelo.text.trim(),
@@ -83,7 +88,7 @@ class _AsignarLlantaScreenState extends State<AsignarLlantaScreen> {
                 ),
                 textInputAction: TextInputAction.done,
                 keyboardType: TextInputType.number,
-                onFieldSubmitted: (_) => _guardar(),
+
                 validator: (value) {
                   final texto = (value ?? '').trim();
                   if (texto.isEmpty) {
@@ -99,10 +104,7 @@ class _AsignarLlantaScreenState extends State<AsignarLlantaScreen> {
                 },
               ),
               const SizedBox(height: 24),
-              FilledButton(
-                onPressed: _guardar,
-                child: const Text('Guardar llanta'),
-              ),
+              GuardarCambios(guardar: _guardar, label: 'Guardar llanta'),
             ],
           ),
         ),

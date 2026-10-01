@@ -46,3 +46,8 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Servicios locales y datos de desarrollo (no se versionan).
+.local/
+api/node_modules/
+api/dist/

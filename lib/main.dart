@@ -1,23 +1,26 @@
 import 'package:flutter/material.dart';
 
-import 'models/vehiculo.dart';
+import 'data/vehiculos_api.dart';
 import 'screens/vehiculos_screen.dart';
 
 void main() {
   runApp(const BitacoraLlantasApp());
 }
 
-const vehiculosDeEjemplo = [
-  Vehiculo(alias: 'Auto familiar', placa: 'ABC-123-A', kilometraje: 45200),
-  Vehiculo(
-    alias: 'Camioneta de trabajo',
-    placa: 'XYZ-789-B',
-    kilometraje: 87350,
-  ),
-];
+class BitacoraLlantasApp extends StatefulWidget {
+  const BitacoraLlantasApp({super.key, this.api});
+  final VehiculosApi? api;
+  @override
+  State<BitacoraLlantasApp> createState() => _BitacoraLlantasAppState();
+}
 
-class BitacoraLlantasApp extends StatelessWidget {
-  const BitacoraLlantasApp({super.key});
+class _BitacoraLlantasAppState extends State<BitacoraLlantasApp> {
+  late final VehiculosApi api = widget.api ?? VehiculosApi();
+  @override
+  void dispose() {
+    if (widget.api == null) api.close();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +30,7 @@ class BitacoraLlantasApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
       ),
-      home: const VehiculosScreen(vehiculos: vehiculosDeEjemplo),
+      home: VehiculosScreen(api: api),
     );
   }
 }

@@ -1,3 +1,5 @@
+import 'fake_api.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bitacora_llantas/models/vehiculo.dart';
@@ -25,8 +27,9 @@ const vehiculo = Vehiculo(
 void main() {
   Future<void> abrir(WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: VehiculosScreen(vehiculos: [vehiculo])),
+      MaterialApp(home: VehiculosScreen(api: FakeApi([vehiculo]))),
     );
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Prueba'));
     await tester.pumpAndSettle();
   }
